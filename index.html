@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistics Tracking Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #0a0e27;
+            --surface-color: #151b3f;
+            --surface-light: #1f2749;
+            --text-primary: #e8eef7;
+            --text-secondary: #a0afc9;
+            --border-color: #2a3f6f;
+            --accent-color: #4ade80;
+            --accent-dark: #22c55e;
+            --danger-color: #f87171;
+            --warning-color: #fbbf24;
+            --info-color: #60a5fa;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--bg-color) 0%, #0f1535 100%);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Modal login */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-modal.hidden {
+            display: none;
+        }
+
+        .login-box {
+            background: var(--surface-color);
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-box h2 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            background: linear-gradient(135deg, var(--accent-color), var(--info-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-box p {
+            color: var(--text-secondary);
+            margin: 0 0 24px 0;
+            font-size: 14px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-light);
+            color: var(--text-primary);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
+        }
+
+        .login-box input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, var(--accent-dark), #16a34a);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 12px 16px;
+            background: var(--surface-light);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-info span {
+            font-size: 14px;
+        }
+
+        .user-name {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .btn-logout {
+            padding: 6px 12px;
+            background: transparent;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .header {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-color), var(--info-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            margin: 8px 0 0 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .card {
+            background: var(--surface-color);
+            padding: 28px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 28px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .grid-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input, button {
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-light);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+        }
+
+        input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+            background: var(--surface-color);
+            box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 13px;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+        }
+
+        .btn-start:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .btn-end {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+        }
+
+        .btn-end:hover {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #000;
+            border: none;
+            flex: 0 0 auto;
+        }
+
+        .btn-stop:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+        }
+
+        .btn-action {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
+            color: #000;
+            border: none;
+            grid-column: 1 / -1;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .btn-action:hover {
+            background: linear-gradient(135deg, var(--accent-dark), #16a34a);
+        }
+
+        .btn-export {
+            background: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            grid-column: 1 / -1;
+        }
+
+        .btn-export:hover {
+            background: var(--accent-color);
+            color: #000;
+        }
+
+        .btn-reset {
+            background: transparent;
+            border: 2px solid var(--warning-color);
+            color: var(--warning-color);
+            grid-column: 1 / -1;
+        }
+
+        .btn-reset:hover {
+            background: var(--warning-color);
+            color: #000;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .stop-container {
+            display: flex;
+            gap: 8px;
+            grid-column: 1 / -1;
+        }
+
+        .stop-container input {
+            flex: 1;
+        }
+
+        .temp-stops-display {
+            grid-column: 1 / -1;
+            font-size: 13px;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(251, 146, 60, 0.1));
+            padding: 14px 16px;
+            border-radius: 8px;
+            border: 1px dashed var(--warning-color);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            color: var(--warning-color);
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .temp-stops-display.empty {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .status-bar {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(74, 222, 128, 0.1));
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--info-color);
+            font-family: 'Courier New', monospace;
+            border-left: 3px solid var(--info-color);
+            line-height: 1.6;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 0;
+        }
+
+        thead {
+            background: var(--surface-light);
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 14px 16px;
+            text-align: left;
+        }
+
+        th {
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        tbody tr {
+            transition: background 0.2s ease;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tbody tr:hover {
+            background: var(--surface-light);
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .col-location {
+            color: var(--warning-color);
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .col-speed {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .col-duration {
+            color: var(--info-color);
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(96, 165, 250, 0.1));
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .grid-controls {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px 12px;
+            }
+
+            .login-box {
+                margin: 20px;
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- MODAL ĐĂNG NHẬP -->
+<div id="loginModal" class="login-modal">
+    <div class="login-box">
+        <h2>👤 Đăng Nhập</h2>
+        <p>Nhập tên người dùng để bắt đầu ghi nhận lộ trình</p>
+        <input 
+            type="text" 
+            id="usernameInput" 
+            placeholder="Ví dụ: Tài xế A, Hoàng Anh, Bảo..." 
+            maxlength="30"
+            onkeypress="if(event.key==='Enter') handleLogin()"
+        >
+        <button class="login-btn" onclick="handleLogin()">Đăng Nhập</button>
+    </div>
+</div>
+
+<div class="container" style="display: none;" id="mainContent">
+    <!-- USER INFO -->
+    <div class="user-info">
+        <span>Người dùng hiện tại: <span class="user-name" id="currentUsername">-</span></span>
+        <button class="btn-logout" onclick="handleLogout()">Đăng Xuất</button>
+    </div>
+
+    <div class="header">
+        <h1>📍 Logistics Tracking</h1>
+        <p>Ghi nhận lộ trình vận chuyển và tính toán vận tốc</p>
+    </div>
+
+    <div class="card">
+        <div class="section-title">🎯 Thông tin chuyến đi</div>
+        
+        <div class="grid-controls">
+            <button class="btn-start" id="btnStart" onclick="logTime('start')">⏱ BẮT ĐẦU</button>
+            <button class="btn-end" id="btnEnd" onclick="logTime('end')" disabled>🏁 KẾT THÚC</button>
+            
+            <div class="stop-container">
+                <input type="text" id="stopLocation" placeholder="Nhập tên trạm dừng..." maxlength="50">
+                <button class="btn-stop" id="btnAddStop" onclick="recordStop()">➕ GHI NHẬN</button>
+            </div>
+
+            <div id="tempStopsDisplay" class="temp-stops-display empty">Chưa có trạm nào được ghi nhận</div>
+
+            <input type="number" id="distanceInput" placeholder="Nhập quãng đường (km)" step="0.1" min="0" max="10000">
+            
+            <button class="btn-action" id="btnAddTable" onclick="addToTable()" disabled>✅ THÊM VÀO BẢNG & TÍNH TOÁN</button>
+            <button class="btn-export" onclick="exportToSheets()">📊 XUẤT RA GOOGLE SHEETS</button>
+            <button class="btn-reset" onclick="resetAllData()">🔄 XÓA TẤT CẢ DỮ LIỆU</button>
+        </div>
+
+        <div id="statusMsg" class="status-bar">✓ Hệ thống đã sẵn sàng. Nhấn "BẮT ĐẦU" để bắt đầu ghi nhận.</div>
+    </div>
+
+    <!-- Stats -->
+    <div id="statsContainer" class="stats-grid" style="display: none; margin-bottom: 28px;">
+        <div class="stat-card">
+            <div class="label">Tổng chuyến</div>
+            <div class="value" id="statTrips">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Tổng quãng đường</div>
+            <div class="value" id="statDistance">0 km</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Vận tốc trung bình</div>
+            <div class="value" id="statAvgSpeed">0 km/h</div>
+        </div>
+    </div>
+
+    <!-- Bảng dữ liệu -->
+    <div class="card">
+        <div class="section-title">📋 Lịch sử chuyến đi</div>
+        <div style="overflow-x: auto;">
+            <table id="mainTable">
+                <thead>
+                    <tr>
+                        <th>Bắt đầu</th>
+                        <th>Kết thúc</th>
+                        <th>Thời lượng</th>
+                        <th>Lộ trình</th>
+                        <th>Quãng đường</th>
+                        <th>Vận tốc</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                            Chưa có dữ liệu. Bắt đầu ghi nhận chuyến đi mới.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== QUẢN LÝ NGƯỜI DÙNG & LOCALSTORAGE =====
+    let currentUsername = null;
+    let currentData = { start: null, end: null };
+    let logs = [];
+    let currentStops = [];
+
+    // ===== CẤUHÌNH GOOGLE SCRIPT URL =====
+    const GOOGLE_SCRIPT_URL = 'THAY_LINK_SCRIPT_CỦA_BẠN_VÀO_ĐÂY';
+
+    // ===== TẠO KEY DỰA TRÊN USERNAME =====
+    function getStorageKey(suffix) {
+        if (!currentUsername) return null;
+        return `logistics_${currentUsername}_${suffix}`;
+    }
+
+    // ===== LƯU DỮ LIỆU VÀO LOCALSTORAGE =====
+    function saveLogs() {
+        try {
+            const key = getStorageKey('logs');
+            if (key) {
+                localStorage.setItem(key, JSON.stringify(logs));
+            }
+        } catch (e) {
+            console.warn('Không thể lưu logs vào localStorage:', e);
+        }
+    }
+
+    function saveSessions() {
+        try {
+            const keyData = getStorageKey('data');
+            const keyStops = getStorageKey('stops');
+            if (keyData && keyStops) {
+                localStorage.setItem(keyData, JSON.stringify(currentData));
+                localStorage.setItem(keyStops, JSON.stringify(currentStops));
+            }
+        } catch (e) {
+            console.warn('Không thể lưu session vào localStorage:', e);
+        }
+    }
+
+    // ===== TẢI DỮ LIỆU TỪ LOCALSTORAGE =====
+    function loadLogs() {
+        try {
+            const key = getStorageKey('logs');
+            if (key) {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    logs = JSON.parse(data);
+                }
+            }
+        } catch (e) {
+            console.warn('Không thể tải logs từ localStorage:', e);
+            logs = [];
+        }
+    }
+
+    function loadSessions() {
+        try {
+            const keyData = getStorageKey('data');
+            const keyStops = getStorageKey('stops');
+            
+            if (keyData && keyStops) {
+                const dataStr = localStorage.getItem(keyData);
+                const stopsStr = localStorage.getItem(keyStops);
+                
+                if (dataStr) {
+                    const parsed = JSON.parse(dataStr);
+                    currentData = {
+                        start: parsed.start ? new Date(parsed.start) : null,
+                        end: parsed.end ? new Date(parsed.end) : null
+                    };
+                }
+                if (stopsStr) {
+                    currentStops = JSON.parse(stopsStr);
+                }
+            }
+        } catch (e) {
+            console.warn('Không thể tải session từ localStorage:', e);
+        }
+    }
+
+    // ===== ĐĂNG NHẬP =====
+    function handleLogin() {
+        const username = document.getElementById('usernameInput').value.trim();
+        
+        if (!username) {
+            alert('❌ Vui lòng nhập tên người dùng!');
+            return;
+        }
+
+        if (username.length < 2) {
+            alert('❌ Tên người dùng phải có ít nhất 2 ký tự!');
+            return;
+        }
+
+        currentUsername = username;
+        
+        // Tải dữ liệu của người dùng này
+        loadLogs();
+        loadSessions();
+        
+        // Hiển thị giao diện chính
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('mainContent').style.display = 'block';
+        document.getElementById('currentUsername').innerText = currentUsername;
+        
+        // Khởi tạo giao diện
+        init();
+    }
+
+    // ===== ĐĂNG XUẤT =====
+    function handleLogout() {
+        if (confirm('⚠️  Bạn có chắc chắn muốn đăng xuất? Dữ liệu sẽ được lưu lại.')) {
+            currentUsername = null;
+            currentData = { start: null, end: null };
+            logs = [];
+            currentStops = [];
+            
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('usernameInput').focus();
+        }
+    }
+
+    // ===== HÀM GHI NHẬN MỐC THỜI GIAN =====
+    function logTime(type) {
+        const now = new Date();
+        currentData[type] = now;
+        saveSessions();
+        
+        const timeStr = now.toLocaleTimeString('vi-VN', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        });
+
+        if (type === 'start') {
+            document.getElementById('statusMsg').innerText = 
+                `✓ Đã ghi nhận giờ BẮT ĐẦU: ${timeStr}`;
+            document.getElementById('btnEnd').disabled = false;
+            document.getElementById('btnStart').disabled = true;
+            document.getElementById('stopLocation').focus();
+        } else {
+            document.getElementById('statusMsg').innerText = 
+                `✓ Đã ghi nhận giờ KẾT THÚC: ${timeStr}. Vui lòng kiểm tra dữ liệu và nhấn "THÊM VÀO BẢNG".`;
+            document.getElementById('btnEnd').disabled = true;
+            document.getElementById('btnStart').disabled = false;
+            document.getElementById('btnAddTable').disabled = false;
+            document.getElementById('stopLocation').disabled = true;
+            document.getElementById('btnAddStop').disabled = true;
+        }
+    }
+
+    // ===== HÀM GHI NHẬN TRẠM DỮ LIỆU =====
+    function recordStop() {
+        const input = document.getElementById('stopLocation');
+        const val = input.value.trim();
+
+        if (!val) {
+            document.getElementById('statusMsg').innerText = 
+                `✗ Lỗi: Vui lòng nhập tên trạm trước khi ghi nhận.`;
+            return;
+        }
+
+        if (val.length > 50) {
+            document.getElementById('statusMsg').innerText = 
+                `✗ Lỗi: Tên trạm quá dài (tối đa 50 ký tự).`;
+            return;
+        }
+
+        currentStops.push(val);
+        saveSessions();
+        updateStopsDisplay();
+        input.value = '';
+        input.focus();
+
+        document.getElementById('statusMsg').innerText = 
+            `✓ Đã ghi nhận trạm: "${val}" (Tổng ${currentStops.length} trạm)`;
+    }
+
+    // ===== CẬP NHẬT HIỂN THỊ TRẠM =====
+    function updateStopsDisplay() {
+        const display = document.getElementById('tempStopsDisplay');
+        if (currentStops.length === 0) {
+            display.classList.add('empty');
+            display.innerText = 'Chưa có trạm nào được ghi nhận';
+        } else {
+            display.classList.remove('empty');
+            display.innerText = '🛑 Trạm ghi tạm: ' + currentStops.join(' ➜ ');
+        }
+    }
+
+    // ===== HÀM TÍNH KHOẢNG THỜI GIAN =====
+    function calculateDuration(start, end) {
+        if (!start || !end) return null;
+
+        const diffMs = end.getTime() - start.getTime();
+
+        if (diffMs < 0) {
+            return {
+                text: 'Lỗi: Giờ kết thúc phải sau giờ bắt đầu',
+                hours: 0,
+                valid: false
+            };
+        }
+
+        const totalSeconds = Math.floor(diffMs / 1000);
+        const hrs = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+
+        return {
+            text: `${hrs}h ${mins}m ${secs}s`,
+            hours: diffMs / 3600000,
+            valid: true
+        };
+    }
+
+    // ===== HÀM THÊM VÀO BẢNG =====
+    function addToTable() {
+        if (!currentData.start || !currentData.end) {
+            alert('❌ Vui lòng ghi nhận cả giờ bắt đầu và kết thúc!');
+            return;
+        }
+
+        const lastInput = document.getElementById('stopLocation').value.trim();
+        if (lastInput) {
+            currentStops.push(lastInput);
+        }
+
+        const distance = parseFloat(document.getElementById('distanceInput').value);
+        if (isNaN(distance) || distance <= 0) {
+            alert('❌ Vui lòng nhập quãng đường hợp lệ (> 0 km)!');
+            return;
+        }
+
+        const duration = calculateDuration(currentData.start, currentData.end);
+        if (!duration.valid) {
+            alert('❌ ' + duration.text);
+            return;
+        }
+
+        const speed = duration.hours > 0 ? (distance / duration.hours).toFixed(2) : '0.00';
+        const routeText = currentStops.length > 0 
+            ? currentStops.join(' ➜ ') 
+            : '(Không có trạm dừng)';
+
+        const entry = {
+            startTime: formatDateTime(currentData.start),
+            endTime: formatDateTime(currentData.end),
+            duration: duration.text,
+            location: routeText,
+            distance: distance,
+            speed: speed,
+            originalDistance: distance,
+            originalHours: duration.hours
+        };
+
+        logs.push(entry);
+        saveLogs();
+        updateTable();
+        updateStats();
+        resetAllInputs();
+
+        document.getElementById('statusMsg').innerText = 
+            `✓ Đã thêm chuyến đi vào bảng. Sẵn sàng ghi nhận chuyến tiếp theo.`;
+    }
+
+    // ===== HÀM FORMAT DATETIME =====
+    function formatDateTime(date) {
+        const time = date.toLocaleTimeString('vi-VN', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        });
+        const d = date.toLocaleDateString('vi-VN');
+        return `${time} (${d})`;
+    }
+
+    // ===== CẬP NHẬT BẢNG =====
+    function updateTable() {
+        const tbody = document.getElementById('tableBody');
+        
+        if (logs.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                        Chưa có dữ liệu. Bắt đầu ghi nhận chuyến đi mới.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = logs.map((row, idx) => `
+            <tr>
+                <td>${row.startTime}</td>
+                <td>${row.endTime}</td>
+                <td class="col-duration">${row.duration}</td>
+                <td class="col-location">${row.location}</td>
+                <td>${row.distance.toFixed(2)} km</td>
+                <td class="col-speed">${row.speed} km/h</td>
+            </tr>
+        `).join('');
+    }
+
+    // ===== CẬP NHẬT THỐNG KÊ =====
+    function updateStats() {
+        if (logs.length === 0) {
+            document.getElementById('statsContainer').style.display = 'none';
+            return;
+        }
+
+        document.getElementById('statsContainer').style.display = 'grid';
+
+        const totalTrips = logs.length;
+        const totalDistance = logs.reduce((sum, log) => sum + log.originalDistance, 0);
+        const totalHours = logs.reduce((sum, log) => sum + log.originalHours, 0);
+        const avgSpeed = totalHours > 0 ? (totalDistance / totalHours).toFixed(2) : '0.00';
+
+        document.getElementById('statTrips').innerText = totalTrips;
+        document.getElementById('statDistance').innerText = totalDistance.toFixed(2) + ' km';
+        document.getElementById('statAvgSpeed').innerText = avgSpeed + ' km/h';
+    }
+
+    // ===== RESET INPUT =====
+    function resetAllInputs() {
+        currentData = { start: null, end: null };
+        currentStops = [];
+        document.getElementById('stopLocation').value = '';
+        document.getElementById('distanceInput').value = '';
+        document.getElementById('stopLocation').disabled = false;
+        document.getElementById('btnAddStop').disabled = false;
+        document.getElementById('btnAddTable').disabled = true;
+        document.getElementById('btnStart').disabled = false;
+        document.getElementById('btnEnd').disabled = true;
+        updateStopsDisplay();
+    }
+
+    // ===== XÓA TẤT CẢ DỮ LIỆU =====
+    function resetAllData() {
+        if (logs.length === 0) {
+            alert('📭 Bảng hiện đang trống.');
+            return;
+        }
+
+        if (!confirm('⚠️  Bạn có chắc chắn muốn xóa tất cả dữ liệu? Hành động này không thể hoàn tác.')) {
+            return;
+        }
+
+        logs = [];
+        currentData = { start: null, end: null };
+        currentStops = [];
+        
+        try {
+            const keyLogs = getStorageKey('logs');
+            const keyData = getStorageKey('data');
+            const keyStops = getStorageKey('stops');
+            
+            if (keyLogs) localStorage.removeItem(keyLogs);
+            if (keyData) localStorage.removeItem(keyData);
+            if (keyStops) localStorage.removeItem(keyStops);
+        } catch (e) {
+            console.warn('Lỗi xóa localStorage:', e);
+        }
+        
+        updateTable();
+        updateStats();
+        resetAllInputs();
+        
+        document.getElementById('statusMsg').innerText = 
+            `✓ Đã xóa tất cả dữ liệu. Hệ thống đã sẵn sàng.`;
+    }
+
+    // ===== XUẤT RA GOOGLE SHEETS =====
+    function exportToSheets() {
+        if (logs.length === 0) {
+            alert('❌ Bảng hiện đang trống, không có gì để xuất!');
+            return;
+        }
+
+        if (GOOGLE_SCRIPT_URL.includes('THAY_LINK_SCRIPT')) {
+            alert('❌ Bạn chưa cấu hình GOOGLE_SCRIPT_URL trong code!');
+            return;
+        }
+
+        document.getElementById('statusMsg').innerText = 
+            `⏳ Đang gửi dữ liệu đến Google Sheets...`;
+
+        const dataToSend = logs.map(log => ({
+            username: currentUsername,
+            startTime: log.startTime,
+            endTime: log.endTime,
+            duration: log.duration,
+            location: log.location,
+            distance: log.distance,
+            speed: log.speed
+        }));
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dataToSend)
+        })
+        .then(() => {
+            alert('✅ Dữ liệu đã được xuất thành công sang Google Sheets!');
+            document.getElementById('statusMsg').innerText = 
+                `✓ Xuất dữ liệu hoàn tất.`;
+        })
+        .catch(err => {
+            alert('❌ Lỗi khi gửi dữ liệu: ' + err.message);
+            document.getElementById('statusMsg').innerText = 
+                `✗ Lỗi kết nối!`;
+        });
+    }
+
+    // ===== KHỞI TẠO =====
+    function init() {
+        updateTable();
+        updateStats();
+        updateStopsDisplay();
+        
+        if (currentData.start && !currentData.end) {
+            document.getElementById('btnStart').disabled = true;
+            document.getElementById('btnEnd').disabled = false;
+            document.getElementById('stopLocation').disabled = false;
+            document.getElementById('btnAddStop').disabled = false;
+        } else if (currentData.start && currentData.end) {
+            document.getElementById('btnStart').disabled = false;
+            document.getElementById('btnEnd').disabled = true;
+            document.getElementById('stopLocation').disabled = true;
+            document.getElementById('btnAddStop').disabled = true;
+            document.getElementById('btnAddTable').disabled = false;
+        }
+        
+        document.getElementById('statusMsg').innerText = 
+            `✓ Hệ thống đã sẵn sàng. Nhấn "BẮT ĐẦU" để bắt đầu ghi nhận.`;
+    }
+
+    // Focus vào input khi trang tải
+    window.addEventListener('load', function() {
+        document.getElementById('usernameInput').focus();
+    });
+</script>
+
+</body>
+</html>
