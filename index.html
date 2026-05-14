@@ -780,7 +780,7 @@
             };
         }
 
-        const totalSeconds = Math.floor(diffMs / 1000);
+        const totalSeconds = Math.round(diffMs / 1000);
         const hrs = Math.floor(totalSeconds / 3600);
         const mins = Math.floor((totalSeconds % 3600) / 60);
         const secs = totalSeconds % 60;
